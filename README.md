@@ -1,6 +1,6 @@
-# BotMan Microsoft Bot Framework Driver
+# BotMan WeChat Driver
 
-BotMan driver to connect Microsoft Bot Framework with [BotMan](https://github.com/botman/botman)
+BotMan driver to connect WeChat with [BotMan](https://github.com/botman/botman)
 
 ## Contributing
 
