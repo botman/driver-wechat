@@ -1,0 +1,11 @@
+{
+    "botman/driver-config": [
+        "stubs/wechat.php"
+    ],
+    "botman/driver": [
+        "BotMan\\Drivers\\WeChat\\WeChatDriver",
+        "BotMan\\Drivers\\WeChat\\WeChatLocationDriver",
+        "BotMan\\Drivers\\WeChat\\WeChatPhotoDriver",
+        "BotMan\\Drivers\\WeChat\\WeChatVideoDriver"
+    ]
+}
