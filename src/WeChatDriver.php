@@ -8,11 +8,12 @@ use BotMan\BotMan\Drivers\HttpDriver;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use Symfony\Component\HttpFoundation\Request;
 use BotMan\BotMan\Messages\Outgoing\Question;
+use BotMan\BotMan\Interfaces\VerifiesService;
 use Symfony\Component\HttpFoundation\Response;
 use BotMan\BotMan\Messages\Incoming\IncomingMessage;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
 
-class WeChatDriver extends HttpDriver
+class WeChatDriver extends HttpDriver implements VerifiesService
 {
     const DRIVER_NAME = 'WeChat';
 
@@ -175,5 +176,23 @@ class WeChatDriver extends HttpDriver
     {
         return $this->http->post('https://api.wechat.com/cgi-bin/'.$endpoint.'?access_token='.$this->getAccessToken(),
             [], $parameters, [], true);
+    }
+
+    /**
+     * @param Request $request
+     * @return null|Response
+     */
+    public function verifyRequest(Request $request)
+    {
+        if ($request->get('signature') !== null && $request->get('timestamp') !== null && $request->get('nonce') !== null && $request->get('echostr') !== null) {
+            $tmpArr = [$this->config->get('verification'), $request->get('timestamp'), $request->get('nonce')];
+            sort($tmpArr, SORT_STRING);
+            $tmpStr = implode($tmpArr);
+            $tmpStr = sha1($tmpStr);
+
+            if ($tmpStr == $request->get('signature')) {
+                return Response::create($request->get('echostr'))->send();
+            }
+        }
     }
 }

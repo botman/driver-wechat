@@ -21,4 +21,14 @@ return [
     |
     */
     'app_key' => env('WECHAT_APP_KEY'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Verification key
+    |--------------------------------------------------------------------------
+    |
+    | Your WeChat webhook verification key.
+    |
+    */
+    'verification' => env('WECHAT_VERIFICATION'),
 ];
