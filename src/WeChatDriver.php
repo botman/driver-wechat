@@ -31,6 +31,7 @@ class WeChatDriver extends HttpDriver implements VerifiesService
         }
         $this->payload = $request->request->all();
         $this->event = Collection::make($data);
+        $this->config = Collection::make($this->config->get('wechat'));
     }
 
     /**
@@ -92,7 +93,7 @@ class WeChatDriver extends HttpDriver implements VerifiesService
      */
     protected function getAccessToken()
     {
-        $response = $this->http->post('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid='.$this->config->get('wechat_app_id').'&secret='.$this->config->get('wechat_app_key'),
+        $response = $this->http->post('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid='.$this->config->get('app_id').'&secret='.$this->config->get('app_key'),
             [], []);
         $responseData = json_decode($response->getContent());
 
@@ -161,7 +162,7 @@ class WeChatDriver extends HttpDriver implements VerifiesService
      */
     public function isConfigured()
     {
-        return ! is_null($this->config->get('wechat_app_id')) && ! is_null($this->config->get('wechat_app_key'));
+        return ! is_null($this->config->get('app_id')) && ! is_null($this->config->get('app_key'));
     }
 
     /**
