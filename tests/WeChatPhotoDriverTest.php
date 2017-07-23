@@ -5,9 +5,9 @@ namespace Tests;
 use Mockery as m;
 use BotMan\BotMan\Http\Curl;
 use PHPUnit_Framework_TestCase;
-use Symfony\Component\HttpFoundation\Request;
-use BotMan\BotMan\Messages\Attachments\Image;
 use BotMan\Drivers\WeChat\WeChatPhotoDriver;
+use BotMan\BotMan\Messages\Attachments\Image;
+use Symfony\Component\HttpFoundation\Request;
 
 class WeChatPhotoDriverTest extends PHPUnit_Framework_TestCase
 {

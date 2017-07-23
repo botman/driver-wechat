@@ -6,8 +6,8 @@ use Mockery as m;
 use BotMan\BotMan\Http\Curl;
 use PHPUnit_Framework_TestCase;
 use Symfony\Component\HttpFoundation\Request;
-use BotMan\BotMan\Messages\Attachments\Location;
 use BotMan\Drivers\WeChat\WeChatLocationDriver;
+use BotMan\BotMan\Messages\Attachments\Location;
 
 class WeChatLocationDriverTest extends PHPUnit_Framework_TestCase
 {
