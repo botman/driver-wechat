@@ -5,11 +5,11 @@ namespace Tests;
 use Mockery as m;
 use BotMan\BotMan\Http\Curl;
 use PHPUnit_Framework_TestCase;
-use Symfony\Component\HttpFoundation\Request;
+use BotMan\Drivers\WeChat\WeChatDriver;
 use BotMan\BotMan\Messages\Attachments\Image;
 use BotMan\BotMan\Messages\Outgoing\Question;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use BotMan\Drivers\WeChat\WeChatDriver;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;
 
 class WeChatDriverTest extends PHPUnit_Framework_TestCase
@@ -146,7 +146,7 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
             'wechat' => [
                 'app_id' => 'WECHAT-APP-ID',
                 'app_key' => 'WECHAT-APP-KEY',
-            ]
+            ],
         ], $html);
 
         $message = $driver->getMessages()[0];
@@ -188,7 +188,7 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
             'wechat' => [
                 'app_id' => 'WECHAT-APP-ID',
                 'app_key' => 'WECHAT-APP-KEY',
-            ]
+            ],
         ], $html);
 
         $message = $driver->getMessages()[0];
@@ -230,7 +230,7 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
             'wechat' => [
                 'app_id' => 'WECHAT-APP-ID',
                 'app_key' => 'WECHAT-APP-KEY',
-            ]
+            ],
         ], $html);
 
         $message = $driver->getMessages()[0];
@@ -271,7 +271,7 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
             'wechat' => [
                 'app_id' => 'WECHAT-APP-ID',
                 'app_key' => 'WECHAT-APP-KEY',
-            ]
+            ],
         ], $html);
 
         $message = $driver->getMessages()[0];
@@ -291,7 +291,7 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
             'wechat' => [
                 'app_id' => 'WECHAT-APP-ID',
                 'app_key' => 'WECHAT-APP-KEY',
-            ]
+            ],
         ], $htmlInterface);
 
         $this->assertTrue($driver->isConfigured());
@@ -300,7 +300,7 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
             'wechat' => [
                 'wechat_app_id' => null,
                 'wechat_app_key' => null,
-            ]
+            ],
         ], $htmlInterface);
 
         $this->assertFalse($driver->isConfigured());
@@ -348,7 +348,7 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
             'wechat' => [
                 'app_id' => 'WECHAT-APP-ID',
                 'app_key' => 'WECHAT-APP-KEY',
-            ]
+            ],
         ], $html);
 
         $message = $driver->getMessages()[0];
@@ -394,7 +394,7 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
             'wechat' => [
                 'app_id' => 'WECHAT-APP-ID',
                 'app_key' => 'WECHAT-APP-KEY',
-            ]
+            ],
         ], $html);
 
         $message = $driver->getMessages()[0];

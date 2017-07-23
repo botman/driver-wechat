@@ -95,7 +95,7 @@ class WeChatVideoDriverTest extends PHPUnit_Framework_TestCase
             'wechat' => [
                 'app_id' => 'WECHAT-APP-ID',
                 'app_key' => 'WECHAT-APP-KEY',
-            ]
+            ],
         ], $html);
 
         $messages = $driver->getMessages();
@@ -119,7 +119,7 @@ class WeChatVideoDriverTest extends PHPUnit_Framework_TestCase
             'wechat' => [
                 'app_id' => 'WECHAT-APP-ID',
                 'app_key' => 'WECHAT-APP-KEY',
-            ]
+            ],
         ], $html);
 
         $message = $driver->getMessages()[0];
