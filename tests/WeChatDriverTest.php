@@ -49,6 +49,25 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
     }
 
     /** @test */
+    public function it_matches_the_request_with_link()
+    {
+        $driver = $this->getDriver('foo');
+        $this->assertFalse($driver->matchesRequest());
+
+        $driver = $this->getDriver('<xml>
+<ToUserName><![CDATA[toUser]]></ToUserName>
+<FromUserName><![CDATA[fromUser]]></FromUserName>
+<CreateTime>1351776360</CreateTime>
+<MsgType><![CDATA[link]]></MsgType>
+<Title><![CDATA[Official Account Admin Platform Website Link]]></Title>
+<Description><![CDATA[Official Account Admin Platform Website Link]]></Description>
+<Url><![CDATA[url]]></Url>
+<MsgId>1234567890123456</MsgId>
+</xml> ');
+        $this->assertTrue($driver->matchesRequest());
+    }
+
+    /** @test */
     public function it_returns_the_message_object()
     {
         $driver = $this->getDriver('<xml><ToUserName><![CDATA[to_user_name]]></ToUserName>
@@ -58,6 +77,22 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
 <Content><![CDATA[foo]]></Content>
 <MsgId>1234567890</MsgId>
 </xml>');
+        $this->assertTrue(is_array($driver->getMessages()));
+    }
+
+    /** @test */
+    public function it_returns_the_message_object_with_link()
+    {
+        $driver = $this->getDriver('<xml>
+<ToUserName><![CDATA[toUser]]></ToUserName>
+<FromUserName><![CDATA[fromUser]]></FromUserName>
+<CreateTime>1351776360</CreateTime>
+<MsgType><![CDATA[link]]></MsgType>
+<Title><![CDATA[Official Account Admin Platform Website Link]]></Title>
+<Description><![CDATA[Official Account Admin Platform Website Link]]></Description>
+<Url><![CDATA[url]]></Url>
+<MsgId>1234567890123456</MsgId>
+</xml> ');
         $this->assertTrue(is_array($driver->getMessages()));
     }
 
@@ -72,6 +107,22 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
 <MsgId>1234567890</MsgId>
 </xml>');
         $this->assertSame('Hi Julia', $driver->getMessages()[0]->getText());
+    }
+
+    /** @test */
+    public function it_returns_the_message_link()
+    {
+        $driver = $this->getDriver('<xml>
+<ToUserName><![CDATA[toUser]]></ToUserName>
+<FromUserName><![CDATA[fromUser]]></FromUserName>
+<CreateTime>1351776360</CreateTime>
+<MsgType><![CDATA[link]]></MsgType>
+<Title><![CDATA[Official Account Admin Platform Website Link]]></Title>
+<Description><![CDATA[Official Account Admin Platform Website Link]]></Description>
+<Url><![CDATA[url]]></Url>
+<MsgId>1234567890123456</MsgId>
+</xml>');
+        $this->assertSame('url', $driver->getMessages()[0]->getText());
     }
 
     /** @test */
