@@ -47,6 +47,7 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
 </xml>');
         $this->assertTrue($driver->matchesRequest());
     }
+
     /** @test */
     public function it_matches_the_request_with_link()
     {
@@ -78,6 +79,7 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
 </xml>');
         $this->assertTrue(is_array($driver->getMessages()));
     }
+
     /** @test */
     public function it_returns_the_message_object_with_link()
     {
@@ -106,6 +108,7 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
 </xml>');
         $this->assertSame('Hi Julia', $driver->getMessages()[0]->getText());
     }
+
     /** @test */
     public function it_returns_the_message_link()
     {

@@ -2,11 +2,11 @@
 
 namespace Tests;
 
-use BotMan\BotMan\Messages\Attachments\Audio;
-use BotMan\Drivers\WeChat\WeChatAudioDriver;
 use Mockery as m;
 use BotMan\BotMan\Http\Curl;
 use PHPUnit_Framework_TestCase;
+use BotMan\Drivers\WeChat\WeChatAudioDriver;
+use BotMan\BotMan\Messages\Attachments\Audio;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 

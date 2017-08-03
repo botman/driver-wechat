@@ -2,28 +2,28 @@
 
 namespace BotMan\Drivers\WeChat;
 
-use BotMan\BotMan\Messages\Attachments\Image;
 use BotMan\BotMan\Users\User;
-use BotMan\Drivers\WeChat\Exceptions\UnsupportedAttachmentException;
-use BotMan\Drivers\WeChat\Exceptions\WeChatException;
 use Illuminate\Support\Collection;
 use BotMan\BotMan\Drivers\HttpDriver;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Interfaces\VerifiesService;
+use BotMan\BotMan\Messages\Attachments\Image;
 use BotMan\BotMan\Messages\Outgoing\Question;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use BotMan\BotMan\Messages\Incoming\IncomingMessage;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
+use BotMan\Drivers\WeChat\Exceptions\WeChatException;
+use BotMan\Drivers\WeChat\Exceptions\UnsupportedAttachmentException;
 
 class WeChatDriver extends HttpDriver implements VerifiesService
 {
     const DRIVER_NAME = 'WeChat';
 
-	/**
-	 * @param Request $request
-	 * @throws WeChatException
-	 */
+    /**
+     * @param Request $request
+     * @throws WeChatException
+     */
     public function buildPayload(Request $request)
     {
         try {
@@ -36,7 +36,7 @@ class WeChatDriver extends HttpDriver implements VerifiesService
         $this->payload = $request->request->all();
         $this->event = Collection::make($data);
         $this->config = Collection::make($this->config->get('wechat'));
-	    Response::create()->send();
+        Response::create()->send();
     }
 
     /**
@@ -58,11 +58,11 @@ class WeChatDriver extends HttpDriver implements VerifiesService
         return Answer::create($message->getText())->setMessage($message);
     }
 
-	/**
-	 * @param \BotMan\BotMan\Messages\Incoming\IncomingMessage $matchingMessage
-	 * @return User
-	 * @throws WeChatException
-	 */
+    /**
+     * @param \BotMan\BotMan\Messages\Incoming\IncomingMessage $matchingMessage
+     * @return User
+     * @throws WeChatException
+     */
     public function getUser(IncomingMessage $matchingMessage)
     {
         $response = $this->http->post('https://api.wechat.com/cgi-bin/user/info?access_token='.$this->getAccessToken().'&openid='.$matchingMessage->getRecipient().'&lang=en_US',
@@ -70,7 +70,7 @@ class WeChatDriver extends HttpDriver implements VerifiesService
         $responseData = json_decode($response->getContent());
 
         if (isset($responseData->errcode) && $responseData->errcode != 0) {
-        	throw new WeChatException('Error retrieving user info: '. $responseData->errmsg);
+            throw new WeChatException('Error retrieving user info: '.$responseData->errmsg);
         }
 
         $nickname = isset($responseData->nickname) ? $responseData->nickname : '';
@@ -85,11 +85,11 @@ class WeChatDriver extends HttpDriver implements VerifiesService
      */
     public function getMessages()
     {
-    	if ($this->event->get('MsgType') === 'text') {
-    		$text = $this->event->get('Content');
-	    } else {
-    		$text = $this->event->get('Url');
-	    }
+        if ($this->event->get('MsgType') === 'text') {
+            $text = $this->event->get('Content');
+        } else {
+            $text = $this->event->get('Url');
+        }
 
         return [
             new IncomingMessage($text, $this->event->get('FromUserName'),
@@ -117,13 +117,13 @@ class WeChatDriver extends HttpDriver implements VerifiesService
         return $responseData->access_token;
     }
 
-	/**
-	 * @param string|\BotMan\BotMan\Messages\Outgoing\Question|IncomingMessage $message
-	 * @param IncomingMessage $matchingMessage
-	 * @param array $additionalParameters
-	 * @return Response
-	 * @throws UnsupportedAttachmentException
-	 */
+    /**
+     * @param string|\BotMan\BotMan\Messages\Outgoing\Question|IncomingMessage $message
+     * @param IncomingMessage $matchingMessage
+     * @param array $additionalParameters
+     * @return Response
+     * @throws UnsupportedAttachmentException
+     */
     public function buildServicePayload($message, $matchingMessage, $additionalParameters = [])
     {
         $parameters = array_merge_recursive([
@@ -139,10 +139,10 @@ class WeChatDriver extends HttpDriver implements VerifiesService
             $attachment = $message->getAttachment();
 
             if ($attachment !== null && ! $attachment instanceof Image) {
-            	throw new UnsupportedAttachmentException('The '.get_class($attachment).' is not supported (currently: Image)');
+                throw new UnsupportedAttachmentException('The '.get_class($attachment).' is not supported (currently: Image)');
             }
 
-	        $parameters['msgtype'] = 'news';
+            $parameters['msgtype'] = 'news';
             if ($attachment !== null) {
                 $article = [
                     'title' => $message->getText(),
