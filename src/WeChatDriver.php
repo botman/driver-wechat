@@ -41,7 +41,7 @@ class WeChatDriver extends HttpDriver implements VerifiesService
      */
     public function matchesRequest()
     {
-        return ! is_null($this->event->get('MsgType')) && ! is_null($this->event->get('MsgId')) && $this->event->get('MsgType') === 'text';
+        return ! is_null($this->event->get('MsgType')) && ! is_null($this->event->get('MsgId')) && ($this->event->get('MsgType') === 'text' || $this->event->get('MsgType') === 'link');
     }
 
     /**
@@ -74,8 +74,14 @@ class WeChatDriver extends HttpDriver implements VerifiesService
      */
     public function getMessages()
     {
+    	if ($this->event->get('MsgType') === 'text') {
+    		$text = $this->event->get('Content');
+	    } else {
+    		$text = $this->event->get('Url');
+	    }
+
         return [
-            new IncomingMessage($this->event->get('Content'), $this->event->get('FromUserName'),
+            new IncomingMessage($text, $this->event->get('FromUserName'),
                 $this->event->get('ToUserName'), $this->event),
         ];
     }
