@@ -1,4 +1,5 @@
 <?php
+
 namespace BotMan\Drivers\WeChat\Extensions;
 
 use BotMan\BotMan\Interfaces\UserInterface;
@@ -6,13 +7,12 @@ use BotMan\BotMan\Users\User as BotManUser;
 
 class User extends BotManUser implements UserInterface
 {
-
     /**
      * Shows whether the user has followed the official account.
      * 0: The user is not a follower, and you cannot obtain
      * other information about this user.
      *
-     * @return integer|null
+     * @return int|null
      */
     public function getSubscribe()
     {
@@ -21,9 +21,9 @@ class User extends BotManUser implements UserInterface
 
     /**
      * The timestamp when the user follows the official
-     * account or the last time if the user has followed several times
+     * account or the last time if the user has followed several times.
      *
-     * @return integer|null
+     * @return int|null
      */
     public function getSubscribeTime()
     {
@@ -71,9 +71,9 @@ class User extends BotManUser implements UserInterface
     }
 
     /**
-     * 1: Male; 2: Female; 0: Not Set
+     * 1: Male; 2: Female; 0: Not Set.
      *
-     * @return integer|null
+     * @return int|null
      */
     public function getSex()
     {
@@ -83,7 +83,7 @@ class User extends BotManUser implements UserInterface
     /**
      * Profile photo URL. The last number in the URL shows the size of the square image,
      * which can be 0 (640*640), 46, 64, 96 and 132.
-     * This parameter is null if the user hasn't set a profile photo
+     * This parameter is null if the user hasn't set a profile photo.
      *
      * @return string|null
      */
@@ -91,5 +91,4 @@ class User extends BotManUser implements UserInterface
     {
         return $this->getInfo()['headimgurl'] ?? null;
     }
-
 }
