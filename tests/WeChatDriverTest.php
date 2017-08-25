@@ -492,8 +492,10 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
         $request->shouldReceive('getContent')->andReturn($xmlData);
 
         $driver = new WeChatDriver($request, [
-            'wechat_app_id' => 'WECHAT-APP-ID',
-            'wechat_app_key' => 'WECHAT-APP-KEY',
+            'wechat' => [
+                'app_id' => 'WECHAT-APP-ID',
+                'app_key' => 'WECHAT-APP-KEY',
+            ],
         ], $html);
 
         $message = $driver->getMessages()[0];
