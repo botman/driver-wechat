@@ -2,9 +2,9 @@
 
 namespace BotMan\Drivers\WeChat;
 
-use BotMan\BotMan\Users\User;
 use Illuminate\Support\Collection;
 use BotMan\BotMan\Drivers\HttpDriver;
+use BotMan\Drivers\WeChat\Extensions\User;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use Symfony\Component\HttpFoundation\Request;
 use BotMan\BotMan\Messages\Outgoing\Question;
@@ -63,7 +63,7 @@ class WeChatDriver extends HttpDriver implements VerifiesService
         $responseData = json_decode($response->getContent());
         $nickname = isset($responseData->nickname) ? $responseData->nickname : '';
 
-        return new User($matchingMessage->getSender(), null, null, $nickname);
+        return new User($matchingMessage->getSender(), null, null, $nickname, $responseData);
     }
 
     /**

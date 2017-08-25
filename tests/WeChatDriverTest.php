@@ -405,4 +405,61 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
         $message = $driver->getMessages()[0];
         $driver->sendPayload($driver->buildServicePayload(\BotMan\BotMan\Messages\Outgoing\OutgoingMessage::create('Test', Image::url('http://image.url/foo.png')), $message));
     }
+
+    /** @test */
+    public function it_returns_the_user()
+    {
+        $xmlData = '<xml><ToUserName><![CDATA[to_user_name]]></ToUserName>
+<FromUserName><![CDATA[from_user_name]]></FromUserName>
+<CreateTime>1483534197</CreateTime>
+<MsgType><![CDATA[text]]></MsgType>
+<Content><![CDATA[foo]]></Content>
+<MsgId>1234567890</MsgId>
+</xml>';
+
+        $html = m::mock(Curl::class);
+        $html->shouldReceive('post')
+            ->once()
+            ->with('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid=WECHAT-APP-ID&secret=WECHAT-APP-KEY', [], [])
+            ->andReturn(new Response(json_encode([
+                'access_token' => 'SECRET_TOKEN',
+            ])));
+
+        $html->shouldReceive('post')
+            ->once()
+            ->with('https://api.wechat.com/cgi-bin/user/info?access_token=SECRET_TOKEN&openid=to_user_name&lang=en_US', [], [], [], true)
+            ->andReturn(new Response('{
+            "subscribe": 1, 
+            "openid": "o6_bmjrPTlm6_2sgVt7hMZOPfL2M", 
+            "nickname": "Band", 
+            "sex": 1, 
+            "language": "zh_CN", 
+            "city": "Guangzhou", 
+            "province": "Guangdong", 
+            "country": "China", 
+            "headimgurl":    "http://wx.qlogo.cn/mmopen/g3MonUZtNHkdmzicIlibx6iaFqAc56vxLSUfpb6n5WKSYVY0ChQKkiaJSgQ1dZuTOgvLLrhJbERQQ4eMsv84eavHiaiceqxibJxCfHe/0", 
+           "subscribe_time": 1382694957
+        }'));
+
+        $request = m::mock(\Symfony\Component\HttpFoundation\Request::class.'[getContent]');
+        $request->shouldReceive('getContent')->andReturn($xmlData);
+
+        $driver = new WeChatDriver($request, [
+            'wechat_app_id' => 'WECHAT-APP-ID',
+            'wechat_app_key' => 'WECHAT-APP-KEY',
+        ], $html);
+
+        $message = $driver->getMessages()[0];
+        $user = $driver->getUser($message);
+
+        $this->assertSame(1, $user->getSubscribe());
+        $this->assertSame(1382694957, $user->getSubscribeTime());
+        $this->assertSame('Band', $user->getUsername());
+        $this->assertSame('zh_CN', $user->getLanguage());
+        $this->assertSame('Guangzhou', $user->getCity());
+        $this->assertSame('Guangdong', $user->getProvince());
+        $this->assertSame('China', $user->getCountry());
+        $this->assertSame(1, $user->getSex());
+        $this->assertSame('http://wx.qlogo.cn/mmopen/g3MonUZtNHkdmzicIlibx6iaFqAc56vxLSUfpb6n5WKSYVY0ChQKkiaJSgQ1dZuTOgvLLrhJbERQQ4eMsv84eavHiaiceqxibJxCfHe/0', $user->getHeadImageUrl());
+    }
 }
