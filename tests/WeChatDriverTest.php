@@ -5,11 +5,11 @@ namespace Tests;
 use Mockery as m;
 use BotMan\BotMan\Http\Curl;
 use PHPUnit_Framework_TestCase;
-use Symfony\Component\HttpFoundation\Request;
+use BotMan\Drivers\WeChat\WeChatDriver;
 use BotMan\BotMan\Messages\Attachments\Image;
 use BotMan\BotMan\Messages\Outgoing\Question;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use BotMan\Drivers\WeChat\WeChatDriver;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;
 
 class WeChatDriverTest extends PHPUnit_Framework_TestCase
@@ -49,6 +49,25 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
     }
 
     /** @test */
+    public function it_matches_the_request_with_link()
+    {
+        $driver = $this->getDriver('foo');
+        $this->assertFalse($driver->matchesRequest());
+
+        $driver = $this->getDriver('<xml>
+<ToUserName><![CDATA[toUser]]></ToUserName>
+<FromUserName><![CDATA[fromUser]]></FromUserName>
+<CreateTime>1351776360</CreateTime>
+<MsgType><![CDATA[link]]></MsgType>
+<Title><![CDATA[Official Account Admin Platform Website Link]]></Title>
+<Description><![CDATA[Official Account Admin Platform Website Link]]></Description>
+<Url><![CDATA[url]]></Url>
+<MsgId>1234567890123456</MsgId>
+</xml> ');
+        $this->assertTrue($driver->matchesRequest());
+    }
+
+    /** @test */
     public function it_returns_the_message_object()
     {
         $driver = $this->getDriver('<xml><ToUserName><![CDATA[to_user_name]]></ToUserName>
@@ -58,6 +77,22 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
 <Content><![CDATA[foo]]></Content>
 <MsgId>1234567890</MsgId>
 </xml>');
+        $this->assertTrue(is_array($driver->getMessages()));
+    }
+
+    /** @test */
+    public function it_returns_the_message_object_with_link()
+    {
+        $driver = $this->getDriver('<xml>
+<ToUserName><![CDATA[toUser]]></ToUserName>
+<FromUserName><![CDATA[fromUser]]></FromUserName>
+<CreateTime>1351776360</CreateTime>
+<MsgType><![CDATA[link]]></MsgType>
+<Title><![CDATA[Official Account Admin Platform Website Link]]></Title>
+<Description><![CDATA[Official Account Admin Platform Website Link]]></Description>
+<Url><![CDATA[url]]></Url>
+<MsgId>1234567890123456</MsgId>
+</xml> ');
         $this->assertTrue(is_array($driver->getMessages()));
     }
 
@@ -72,6 +107,22 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
 <MsgId>1234567890</MsgId>
 </xml>');
         $this->assertSame('Hi Julia', $driver->getMessages()[0]->getText());
+    }
+
+    /** @test */
+    public function it_returns_the_message_link()
+    {
+        $driver = $this->getDriver('<xml>
+<ToUserName><![CDATA[toUser]]></ToUserName>
+<FromUserName><![CDATA[fromUser]]></FromUserName>
+<CreateTime>1351776360</CreateTime>
+<MsgType><![CDATA[link]]></MsgType>
+<Title><![CDATA[Official Account Admin Platform Website Link]]></Title>
+<Description><![CDATA[Official Account Admin Platform Website Link]]></Description>
+<Url><![CDATA[url]]></Url>
+<MsgId>1234567890123456</MsgId>
+</xml>');
+        $this->assertSame('url', $driver->getMessages()[0]->getText());
     }
 
     /** @test */
@@ -125,16 +176,13 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
 </xml>';
 
         $html = m::mock(Curl::class);
-        $html->shouldReceive('post')
-            ->once()
-            ->with('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid=WECHAT-APP-ID&secret=WECHAT-APP-KEY', [], [])
-            ->andReturn(new Response(json_encode([
-                'access_token' => 'SECRET_TOKEN',
-            ])));
+        $html->shouldReceive('post')->once()->with('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid=WECHAT-APP-ID&secret=WECHAT-APP-KEY',
+            [], [])->andReturn(new Response(json_encode([
+            'access_token' => 'SECRET_TOKEN',
+        ])));
 
-        $html->shouldReceive('post')
-            ->once()
-            ->with('https://api.wechat.com/cgi-bin/message/custom/send?access_token=SECRET_TOKEN', [], [
+        $html->shouldReceive('post')->once()->with('https://api.wechat.com/cgi-bin/message/custom/send?access_token=SECRET_TOKEN',
+            [], [
                 'touser' => 'from_user_name',
                 'msgtype' => 'text',
                 'text' => [
@@ -146,8 +194,10 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
         $request->shouldReceive('getContent')->andReturn($xmlData);
 
         $driver = new WeChatDriver($request, [
-            'wechat_app_id' => 'WECHAT-APP-ID',
-            'wechat_app_key' => 'WECHAT-APP-KEY',
+            'wechat' => [
+                'app_id' => 'WECHAT-APP-ID',
+                'app_key' => 'WECHAT-APP-KEY',
+            ],
         ], $html);
 
         $message = $driver->getMessages()[0];
@@ -166,16 +216,13 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
 </xml>';
 
         $html = m::mock(Curl::class);
-        $html->shouldReceive('post')
-            ->once()
-            ->with('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid=WECHAT-APP-ID&secret=WECHAT-APP-KEY', [], [])
-            ->andReturn(new Response(json_encode([
-                'access_token' => 'SECRET_TOKEN',
-            ])));
+        $html->shouldReceive('post')->once()->with('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid=WECHAT-APP-ID&secret=WECHAT-APP-KEY',
+            [], [])->andReturn(new Response(json_encode([
+            'access_token' => 'SECRET_TOKEN',
+        ])));
 
-        $html->shouldReceive('post')
-            ->once()
-            ->with('https://api.wechat.com/cgi-bin/message/custom/send?access_token=SECRET_TOKEN', [], [
+        $html->shouldReceive('post')->once()->with('https://api.wechat.com/cgi-bin/message/custom/send?access_token=SECRET_TOKEN',
+            [], [
                 'touser' => 'from_user_name',
                 'msgtype' => 'text',
                 'text' => [
@@ -186,13 +233,13 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
         $request = m::mock(\Symfony\Component\HttpFoundation\Request::class.'[getContent]');
         $request->shouldReceive('getContent')->andReturn($xmlData);
 
-        $question = Question::create('How are you doing?')
-            ->addButton(Button::create('Great')->value('great'))
-            ->addButton(Button::create('Good')->value('good'));
+        $question = Question::create('How are you doing?')->addButton(Button::create('Great')->value('great'))->addButton(Button::create('Good')->value('good'));
 
         $driver = new WeChatDriver($request, [
-            'wechat_app_id' => 'WECHAT-APP-ID',
-            'wechat_app_key' => 'WECHAT-APP-KEY',
+            'wechat' => [
+                'app_id' => 'WECHAT-APP-ID',
+                'app_key' => 'WECHAT-APP-KEY',
+            ],
         ], $html);
 
         $message = $driver->getMessages()[0];
@@ -211,16 +258,13 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
 </xml>';
 
         $html = m::mock(Curl::class);
-        $html->shouldReceive('post')
-            ->once()
-            ->with('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid=WECHAT-APP-ID&secret=WECHAT-APP-KEY', [], [])
-            ->andReturn(new Response(json_encode([
-                'access_token' => 'SECRET_TOKEN',
-            ])));
+        $html->shouldReceive('post')->once()->with('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid=WECHAT-APP-ID&secret=WECHAT-APP-KEY',
+            [], [])->andReturn(new Response(json_encode([
+            'access_token' => 'SECRET_TOKEN',
+        ])));
 
-        $html->shouldReceive('post')
-            ->once()
-            ->with('https://api.wechat.com/cgi-bin/message/custom/send?access_token=SECRET_TOKEN', [], [
+        $html->shouldReceive('post')->once()->with('https://api.wechat.com/cgi-bin/message/custom/send?access_token=SECRET_TOKEN',
+            [], [
                 'touser' => 'from_user_name',
                 'msgtype' => 'text',
                 'text' => [
@@ -231,13 +275,13 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
         $request = m::mock(\Symfony\Component\HttpFoundation\Request::class.'[getContent]');
         $request->shouldReceive('getContent')->andReturn($xmlData);
 
-        $question = Question::create('How are you doing?')
-            ->addButton(Button::create('Great')->value('great')->additionalParameters(['foo' => 'bar']))
-            ->addButton(Button::create('Good')->value('good'));
+        $question = Question::create('How are you doing?')->addButton(Button::create('Great')->value('great')->additionalParameters(['foo' => 'bar']))->addButton(Button::create('Good')->value('good'));
 
         $driver = new WeChatDriver($request, [
-            'wechat_app_id' => 'WECHAT-APP-ID',
-            'wechat_app_key' => 'WECHAT-APP-KEY',
+            'wechat' => [
+                'app_id' => 'WECHAT-APP-ID',
+                'app_key' => 'WECHAT-APP-KEY',
+            ],
         ], $html);
 
         $message = $driver->getMessages()[0];
@@ -256,16 +300,13 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
 </xml>';
 
         $html = m::mock(Curl::class);
-        $html->shouldReceive('post')
-            ->once()
-            ->with('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid=WECHAT-APP-ID&secret=WECHAT-APP-KEY', [], [])
-            ->andReturn(new Response(json_encode([
-                'access_token' => 'SECRET_TOKEN',
-            ])));
+        $html->shouldReceive('post')->once()->with('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid=WECHAT-APP-ID&secret=WECHAT-APP-KEY',
+            [], [])->andReturn(new Response(json_encode([
+            'access_token' => 'SECRET_TOKEN',
+        ])));
 
-        $html->shouldReceive('post')
-            ->once()
-            ->with('https://api.wechat.com/cgi-bin/message/custom/send?access_token=SECRET_TOKEN', [], [
+        $html->shouldReceive('post')->once()->with('https://api.wechat.com/cgi-bin/message/custom/send?access_token=SECRET_TOKEN',
+            [], [
                 'touser' => 'from_user_name',
                 'msgtype' => 'text',
                 'text' => [
@@ -278,8 +319,10 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
         $request->shouldReceive('getContent')->andReturn($xmlData);
 
         $driver = new WeChatDriver($request, [
-            'wechat_app_id' => 'WECHAT-APP-ID',
-            'wechat_app_key' => 'WECHAT-APP-KEY',
+            'wechat' => [
+                'app_id' => 'WECHAT-APP-ID',
+                'app_key' => 'WECHAT-APP-KEY',
+            ],
         ], $html);
 
         $message = $driver->getMessages()[0];
@@ -296,15 +339,19 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
         $htmlInterface = m::mock(Curl::class);
 
         $driver = new WeChatDriver($request, [
-            'wechat_app_id' => 'WECHAT-APP-ID',
-            'wechat_app_key' => 'WECHAT-APP-KEY',
+            'wechat' => [
+                'app_id' => 'WECHAT-APP-ID',
+                'app_key' => 'WECHAT-APP-KEY',
+            ],
         ], $htmlInterface);
 
         $this->assertTrue($driver->isConfigured());
 
         $driver = new WeChatDriver($request, [
-            'wechat_app_id' => null,
-            'wechat_app_key' => null,
+            'wechat' => [
+                'wechat_app_id' => null,
+                'wechat_app_key' => null,
+            ],
         ], $htmlInterface);
 
         $this->assertFalse($driver->isConfigured());
@@ -326,16 +373,13 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
 </xml>';
 
         $html = m::mock(Curl::class);
-        $html->shouldReceive('post')
-            ->once()
-            ->with('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid=WECHAT-APP-ID&secret=WECHAT-APP-KEY', [], [])
-            ->andReturn(new Response(json_encode([
-                'access_token' => 'SECRET_TOKEN',
-            ])));
+        $html->shouldReceive('post')->once()->with('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid=WECHAT-APP-ID&secret=WECHAT-APP-KEY',
+            [], [])->andReturn(new Response(json_encode([
+            'access_token' => 'SECRET_TOKEN',
+        ])));
 
-        $html->shouldReceive('post')
-            ->once()
-            ->with('https://api.wechat.com/cgi-bin/message/custom/send?access_token=SECRET_TOKEN', [], [
+        $html->shouldReceive('post')->once()->with('https://api.wechat.com/cgi-bin/message/custom/send?access_token=SECRET_TOKEN',
+            [], [
                 'touser' => 'from_user_name',
                 'msgtype' => 'news',
                 'news' => [
@@ -352,12 +396,15 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
         $request->shouldReceive('getContent')->andReturn($xmlData);
 
         $driver = new WeChatDriver($request, [
-            'wechat_app_id' => 'WECHAT-APP-ID',
-            'wechat_app_key' => 'WECHAT-APP-KEY',
+            'wechat' => [
+                'app_id' => 'WECHAT-APP-ID',
+                'app_key' => 'WECHAT-APP-KEY',
+            ],
         ], $html);
 
         $message = $driver->getMessages()[0];
-        $driver->sendPayload($driver->buildServicePayload(\BotMan\BotMan\Messages\Outgoing\OutgoingMessage::create('Test'), $message));
+        $driver->sendPayload($driver->buildServicePayload(\BotMan\BotMan\Messages\Outgoing\OutgoingMessage::create('Test'),
+            $message));
     }
 
     /** @test */
@@ -372,16 +419,13 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
 </xml>';
 
         $html = m::mock(Curl::class);
-        $html->shouldReceive('post')
-            ->once()
-            ->with('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid=WECHAT-APP-ID&secret=WECHAT-APP-KEY', [], [])
-            ->andReturn(new Response(json_encode([
-                'access_token' => 'SECRET_TOKEN',
-            ])));
+        $html->shouldReceive('post')->once()->with('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid=WECHAT-APP-ID&secret=WECHAT-APP-KEY',
+            [], [])->andReturn(new Response(json_encode([
+            'access_token' => 'SECRET_TOKEN',
+        ])));
 
-        $html->shouldReceive('post')
-            ->once()
-            ->with('https://api.wechat.com/cgi-bin/message/custom/send?access_token=SECRET_TOKEN', [], [
+        $html->shouldReceive('post')->once()->with('https://api.wechat.com/cgi-bin/message/custom/send?access_token=SECRET_TOKEN',
+            [], [
                 'touser' => 'from_user_name',
                 'msgtype' => 'news',
                 'news' => [
@@ -398,12 +442,15 @@ class WeChatDriverTest extends PHPUnit_Framework_TestCase
         $request->shouldReceive('getContent')->andReturn($xmlData);
 
         $driver = new WeChatDriver($request, [
-            'wechat_app_id' => 'WECHAT-APP-ID',
-            'wechat_app_key' => 'WECHAT-APP-KEY',
+            'wechat' => [
+                'app_id' => 'WECHAT-APP-ID',
+                'app_key' => 'WECHAT-APP-KEY',
+            ],
         ], $html);
 
         $message = $driver->getMessages()[0];
-        $driver->sendPayload($driver->buildServicePayload(\BotMan\BotMan\Messages\Outgoing\OutgoingMessage::create('Test', Image::url('http://image.url/foo.png')), $message));
+        $driver->sendPayload($driver->buildServicePayload(\BotMan\BotMan\Messages\Outgoing\OutgoingMessage::create('Test',
+            Image::url('http://image.url/foo.png')), $message));
     }
 
     /** @test */

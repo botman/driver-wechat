@@ -5,21 +5,21 @@ namespace Tests;
 use Mockery as m;
 use BotMan\BotMan\Http\Curl;
 use PHPUnit_Framework_TestCase;
-use BotMan\Drivers\WeChat\WeChatVideoDriver;
-use BotMan\BotMan\Messages\Attachments\Video;
+use BotMan\Drivers\WeChat\WeChatAudioDriver;
+use BotMan\BotMan\Messages\Attachments\Audio;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class WeChatVideoDriverTest extends PHPUnit_Framework_TestCase
+class WeChatAudioDriverTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * Valid WeChat video XML.
+     * Valid WeChat audio XML.
      * @var string
      */
     protected $validXml;
 
     /**
-     * Invalid WeChat video XML.
+     * Invalid WeChat audio XML.
      * @var string
      */
     protected $invalidXml;
@@ -31,7 +31,7 @@ class WeChatVideoDriverTest extends PHPUnit_Framework_TestCase
         $this->validXml = '<xml><ToUserName><![CDATA[to_user_name]]></ToUserName>
             <FromUserName><![CDATA[from_user_name]]></FromUserName>
             <CreateTime>1483534197</CreateTime>
-            <MsgType><![CDATA[video]]></MsgType>
+            <MsgType><![CDATA[voice]]></MsgType>
             <Content><![CDATA[foo]]></Content>
             <MsgId>1234567890</MsgId>
             <MediaId>12345</MediaId>
@@ -59,14 +59,14 @@ class WeChatVideoDriverTest extends PHPUnit_Framework_TestCase
             $htmlInterface = m::mock(Curl::class);
         }
 
-        return new WeChatVideoDriver($request, [], $htmlInterface);
+        return new WeChatAudioDriver($request, [], $htmlInterface);
     }
 
     /** @test */
     public function it_returns_the_driver_name()
     {
         $driver = $this->getDriver([]);
-        $this->assertSame('WeChatVideo', $driver->getName());
+        $this->assertSame('WeChatAudio', $driver->getName());
     }
 
     /** @test */
@@ -80,7 +80,7 @@ class WeChatVideoDriverTest extends PHPUnit_Framework_TestCase
     }
 
     /** @test */
-    public function it_returns_the_video_pattern()
+    public function it_returns_the_voice_pattern()
     {
         $html = m::mock(Curl::class);
         $html->shouldReceive('post')->once()->with('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid=WECHAT-APP-ID&secret=WECHAT-APP-KEY',
@@ -91,7 +91,7 @@ class WeChatVideoDriverTest extends PHPUnit_Framework_TestCase
         $request = m::mock(\Symfony\Component\HttpFoundation\Request::class.'[getContent]');
         $request->shouldReceive('getContent')->andReturn($this->validXml);
 
-        $driver = new WeChatVideoDriver($request, [
+        $driver = new WeChatAudioDriver($request, [
             'wechat' => [
                 'app_id' => 'WECHAT-APP-ID',
                 'app_key' => 'WECHAT-APP-KEY',
@@ -100,11 +100,11 @@ class WeChatVideoDriverTest extends PHPUnit_Framework_TestCase
 
         $messages = $driver->getMessages();
         $this->assertTrue(is_array($messages));
-        $this->assertEquals('%%%_VIDEO_%%%', $messages[0]->getText());
+        $this->assertEquals('%%%_AUDIO_%%%', $messages[0]->getText());
     }
 
     /** @test */
-    public function it_returns_the_video()
+    public function it_returns_the_voice()
     {
         $html = m::mock(Curl::class);
         $html->shouldReceive('post')->once()->with('https://api.wechat.com/cgi-bin/token?grant_type=client_credential&appid=WECHAT-APP-ID&secret=WECHAT-APP-KEY',
@@ -115,7 +115,7 @@ class WeChatVideoDriverTest extends PHPUnit_Framework_TestCase
         $request = m::mock(\Symfony\Component\HttpFoundation\Request::class.'[getContent]');
         $request->shouldReceive('getContent')->andReturn($this->validXml);
 
-        $driver = new WeChatVideoDriver($request, [
+        $driver = new WeChatAudioDriver($request, [
             'wechat' => [
                 'app_id' => 'WECHAT-APP-ID',
                 'app_key' => 'WECHAT-APP-KEY',
@@ -123,9 +123,9 @@ class WeChatVideoDriverTest extends PHPUnit_Framework_TestCase
         ], $html);
 
         $message = $driver->getMessages()[0];
-        $this->assertSame(Video::PATTERN, $message->getText());
+        $this->assertSame(Audio::PATTERN, $message->getText());
         $this->assertSame('http://file.api.wechat.com/cgi-bin/media/get?access_token=SECRET_TOKEN&media_id=12345',
-            $message->getVideos()[0]->getUrl());
-        $this->assertSame($message->getPayload(), $message->getVideos()[0]->getPayload());
+            $message->getAudio()[0]->getUrl());
+        $this->assertSame($message->getPayload(), $message->getAudio()[0]->getPayload());
     }
 }
