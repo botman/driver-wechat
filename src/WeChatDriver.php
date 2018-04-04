@@ -36,7 +36,6 @@ class WeChatDriver extends HttpDriver implements VerifiesService
         $this->payload = $request->request->all();
         $this->event = Collection::make($data);
         $this->config = Collection::make($this->config->get('wechat'));
-        Response::create()->send();
     }
 
     /**
