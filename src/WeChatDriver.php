@@ -126,7 +126,7 @@ class WeChatDriver extends HttpDriver implements VerifiesService
     public function buildServicePayload($message, $matchingMessage, $additionalParameters = [])
     {
         $parameters = array_merge_recursive([
-            'touser' => $matchingMessage->getSender(),
+            'touser' => $matchingMessage->getRecipient(),
             'msgtype' => 'text',
         ], $additionalParameters);
 
