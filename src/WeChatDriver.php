@@ -91,8 +91,8 @@ class WeChatDriver extends HttpDriver implements VerifiesService
         }
 
         return [
-            new IncomingMessage($text, $this->event->get('FromUserName'),
-                $this->event->get('ToUserName'), $this->event),
+            new IncomingMessage($text, $this->event->get('ToUserName'),
+                $this->event->get('FromUserName'), $this->event),
         ];
     }
 
