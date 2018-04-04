@@ -74,7 +74,7 @@ class WeChatDriver extends HttpDriver implements VerifiesService
 
         $nickname = isset($responseData->nickname) ? $responseData->nickname : '';
 
-        return new User($matchingMessage->getSender(), null, null, $nickname, $responseData);
+        return new User($matchingMessage->getRecipient(), null, null, $nickname, $responseData);
     }
 
     /**
